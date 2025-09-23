@@ -1,0 +1,357 @@
+:root {
+    --bg-color: #f0f4f8;
+    --card-bg: #ffffff;
+    --text-color: #4a4a4a;
+    --primary-color: #6a11cb;
+    --primary-light: #2575fc;
+    --important-color: #e74c3c;
+    --intermediate-color: #f1c40f;
+    --not-important-color: #27ae60;
+    --completed-color: #95a5a6;
+    --delete-color: #c0392b;
+    --edit-color: #2980b9;
+    --box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+    /* Nuevos colores para botones */
+    --view-btn-color: linear-gradient(45deg, #1abc9c, #16a085);
+    --edit-btn-color: linear-gradient(45deg, #3498db, #2980b9);
+    --delete-btn-color: linear-gradient(45deg, #e74c3c, #c0392b);
+    --add-btn-color: linear-gradient(45deg, #2ecc71, #27ae60);
+    --hover-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* --------------------- Global --------------------- */
+* { box-sizing: border-box; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    color: var(--text-color);
+    margin: 0;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+.container {
+    max-width: 1400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.magic-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 3.5rem;
+    color: var(--primary-color);
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    animation: pulse 2s infinite ease-in-out;
+}
+.subtitle { font-size: 1.1rem; color: #666; }
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* --------------------- Layout --------------------- */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+}
+.bottom-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+.card {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 25px;
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.task-form-section { grid-column: 1; }
+.tasks-and-stats-container { grid-column: 2; display: flex; flex-direction: column; gap: 30px; }
+.task-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 25px;
+    box-shadow: var(--box-shadow);
+}
+
+/* --------------------- Títulos --------------------- */
+.task-list-container h3,
+.completed-tasks-container h2,
+.stats-section h2,
+.project-mode-section h2,
+.today-tasks-widget h2 { /* Agregado el nuevo selector */
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-light);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --------------------- Form Inputs --------------------- */
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+
+#task-form input,
+#task-form textarea,
+#task-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+#task-form input:focus,
+#task-form textarea:focus,
+#task-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(142, 45, 226, 0.3);
+}
+#task-form textarea { min-height: 100px; resize: vertical; }
+
+/* --------------------- Botones --------------------- */
+button,
+.btn-base,
+.task-actions button,
+.clear-btn,
+.project-actions button,
+#add-project-btn,
+#project-task-form button,
+.project-task-actions button,
+.close-btn,
+.close-btn-tasks {
+    border-radius: 14px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+button:hover,
+.btn-base:hover,
+.task-actions button:hover,
+.clear-btn:hover,
+.project-actions button:hover,
+#add-project-btn:hover,
+#project-task-form button:hover,
+.project-task-actions button:hover,
+.close-btn:hover,
+.close-btn-tasks:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+    opacity: 0.95;
+}
+button:active,
+.btn-base:active,
+.task-actions button:active,
+.clear-btn:active,
+.project-actions button:active,
+#add-project-btn:active,
+#project-task-form button:active,
+.project-task-actions button:active,
+.close-btn:active,
+.close-btn-tasks:active {
+    transform: translateY(1px);
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón cerrar circular */
+.close-btn, .close-btn-tasks {
+    background-color: #ff4d4d;
+    color: white !important;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.close-btn:hover, .close-btn-tasks:hover { background-color: #e60000; }
+
+/* Botón añadir */
+#add-task-btn, #start-project-btn {
+    background: linear-gradient(45deg, var(--primary-color), #2575fc);
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 15px 25px;
+    margin-top: 20px;
+}
+
+/* --------------------- Acciones de tarea --------------------- */
+.task-actions { display: flex; gap: 8px; align-self: flex-end; }
+.task-actions button { font-size: 0.8rem; padding: 8px 14px; }
+.task-actions .complete-btn { background: var(--primary-color); color: white; }
+.task-actions .delete-btn { background: var(--delete-color); color: white; }
+.task-actions .edit-btn { background: var(--edit-color); color: white; }
+.task-actions .uncomplete-btn { background: #34495e; color: white; }
+
+/* Botón limpiar y exportar */
+.completed-header .clear-btn,
+.completed-header .export-btn {
+    font-size: 0.9rem;
+    padding: 10px 18px;
+    color: white;
+}
+.clear-btn { background: var(--delete-color); }
+.export-btn { background: linear-gradient(45deg, #3498db, #2980b9); }
+
+/* Botones de proyectos */
+.project-actions button { padding: 8px 14px; color: white; }
+.project-actions .view-project-btn { background: var(--view-btn-color); }
+.project-actions .edit-project-btn { background: var(--edit-btn-color); }
+.project-actions .delete-project-btn { background: var(--delete-btn-color); }
+#add-project-btn, #project-task-form button { background: var(--add-btn-color); color: white; padding: 12px 20px; font-size: 1rem; }
+
+/* Project task buttons (íconos) */
+.project-task-actions button { background: #f0f0f0; color: var(--primary-color); font-size: 1.2em; padding: 6px; }
+.project-task-actions button:hover { background: #eaeaea; }
+
+/* --------------------- Tareas --------------------- */
+.task-list { list-style: none; padding: 0; gap: 10px; display: flex; flex-direction: column; }
+.task-item {
+    background: #f7f7f7;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.task-item:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.task-item.important { border-left: 6px solid var(--important-color); }
+.task-item.intermediate { border-left: 6px solid var(--intermediate-color); }
+.task-item.not-important { border-left: 6px solid var(--not-important-color); }
+
+/* Contenido de tarea */
+.task-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.task-item h4 { font-size: 1rem; margin: 0; color: var(--primary-color); }
+.task-item p { font-size: 0.8rem; margin: 0 0 10px; color: #777; }
+.task-item-date {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    background-color: #e0e0e0;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+/* Tareas completadas */
+.completed-tasks-container .task-item {
+    opacity: 0.6;
+    background-color: #fcfcfc;
+    border-left: 6px solid var(--completed-color);
+    text-decoration: line-through;
+    color: #888;
+}
+.completed-tasks-container .task-actions .complete-btn,
+.completed-tasks-container .task-actions .edit-btn { display: none; }
+
+.completed-header {
+    display: flex; justify-content: flex-start; align-items: center; gap: 10px;
+    border-bottom: 3px solid var(--primary-light);
+    padding-bottom: 10px; margin-bottom: 20px;
+}
+.completed-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); display: flex; gap: 10px; }
+
+/* --------------------- Stats --------------------- */
+.stats-section { padding: 30px; border-radius: 25px; text-align: center; }
+.progress-bar-container { width: 80%; margin: 20px auto 0; }
+.progress-bar-label { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: var(--primary-color); }
+.progress-bar { background-color: #e0e0e0; border-radius: 50px; height: 20px; overflow: hidden; }
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    width: 0%;
+    border-radius: 50px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* --------------------- Proyectos --------------------- */
+.project-mode-section { padding: 30px; border-radius: 25px; display: flex; flex-direction: column; align-items: center; }
+.modal-overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 90%; max-width: 800px;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+.project-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px; margin-top: 20px;
+}
+.project-card {
+    background-color: #f7f7f7; padding: 20px; border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.5s ease;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border: 2px solid transparent;
+}
+.project-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(106,17,203,0.3);
+}
+.project-card h4 { margin: 0; font-size: 1.2rem; color: var(--primary-color); margin-bottom: 5px; }
+.project-card p { margin: 5px 0 15px; font-size: 0.9rem; color: #777; }
+.project-progress-bar { width: 100%; height: 10px; background-color: #e0e0e0; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+.project-progress-bar-fill { height: 100%; background: linear-gradient(45deg, #06d6a0, #118ab2); transition: width 0.5s ease-in-out; border-radius: 5px; }
+
+.project-task-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+.project-task-list-item:last-child { border-bottom: none; }
+.project-task-list-item.completed { text-decoration: line-through; color: #888; opacity: 0.6; }
+.project-tasks-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 1100px) { .main-content, .bottom-sections { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .magic-title { font-size: 2.5rem; } .task-sections { grid-template-columns: 1fr; } }

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Planner Mágico ✨</title>
+    <link rel="stylesheet" href="Agenda.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1 class="magic-title">
+                <i class="fas fa-sparkles"></i> Mi Agenda Personal <i class="fas fa-sparkles"></i>
+            </h1>
+            <p class="subtitle">Organiza tu día con un toque de magia.</p>
+        </header>
+        
+        <div class="main-content">
+            
+            <div class="task-form-section card">
+                <h2>Añadir una Tarea Nueva</h2>
+                <form id="task-form">
+                    <div class="input-group">
+                        <label for="task-name">Nombre de la Tarea</label>
+                        <input type="text" id="task-name" placeholder="Ej: Leer 30 min sobre HTML/CSS" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="task-details">Detalles de la Tarea</label>
+                        <textarea id="task-details" placeholder="Añade más detalles sobre la tarea..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="task-date">Fecha Límite</label>
+                        <input type="date" id="task-date" required>
+                    </div>
+                    
+                    <div class="priority-options">
+                        <label>Prioridad:</label>
+                        <select id="task-priority">
+                            <option value="important">🔥 Importante</option>
+                            <option value="intermediate">💡 Intermedio</option>
+                            <option value="not-important">🌱 No Importante</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" id="add-task-btn">
+                        <i class="fas fa-plus-circle"></i> Añadir Tarea
+                    </button>
+                </form>
+            </div>
+            
+            <div class="tasks-and-stats-container">
+                
+                <div class="today-tasks-widget card">
+                    <h2><i class="fas fa-sun"></i> Tareas de Hoy</h2>
+                    <ul id="today-tasks-list" class="task-list"></ul>
+                </div>
+
+                <div class="task-sections">
+                    <div class="task-list-container">
+                        <h3><i class="fas fa-fire"></i> Tareas Importantes</h3>
+                        <ul id="important-tasks" class="task-list"></ul>
+                    </div>
+
+                    <div class="task-list-container">
+                        <h3><i class="fas fa-lightbulb"></i> Tareas Intermedias</h3>
+                        <ul id="intermediate-tasks" class="task-list"></ul>
+                    </div>
+                    
+                    <div class="task-list-container">
+                        <h3><i class="fas fa-leaf"></i> Tareas No Importantes</h3>
+                        <ul id="not-important-tasks" class="task-list"></ul>
+                    </div>
+                </div>
+
+                <div class="completed-tasks-container card">
+                    <div class="completed-header">
+                        <h2><i class="fas fa-check-circle"></i> Tareas Completadas</h2>
+                        <button id="export-tasks-btn" class="export-btn"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+                        <button id="clear-completed-btn" class="clear-btn"><i class="fas fa-trash-alt"></i> Limpiar</button>
+                    </div>
+                    <ul id="completed-tasks" class="task-list completed-list"></ul>
+                </div>
+            </div>
+            
+        </div>
+        <div class="bottom-sections">
+            <div class="stats-section card">
+                <h2><i class="fas fa-chart-line"></i> Mi Progreso</h2>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-label">Porcentaje de Tareas Completadas: <span id="progress-percentage">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="project-mode-section card">
+                <h2><i class="fas fa-project-diagram"></i> Modo de Proyecto Mágico</h2>
+                <p>Desglosa un gran proyecto en tareas más pequeñas y manejables.</p>
+                <div class="project-controls">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2><i class="fas fa-tasks"></i> Mis Proyectos</h2>
+            <div id="project-list-container" class="project-grid-container">
+            </div>
+            <h3>Crear Nuevo Proyecto</h3>
+            <form id="project-form">
+                <input type="text" id="project-name" placeholder="Nombre del proyecto" required>
+                <textarea id="project-details" placeholder="Descripción del proyecto..."></textarea>
+                /* <button type="submit" id="add-project-btn"><i class="fas fa-plus"></i> Añadir Proyecto</button> */
+            </form>
+        </div>
+    </div>
+
+    <div id="project-tasks-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn-tasks">&times;</span>
+            <div class="project-tasks-header">
+                <div>
+                    <h2 id="project-tasks-title"></h2>
+                    <p id="project-tasks-description"></p>
+                </div>
+                <div class="project-actions-container">
+                    <button id="edit-project-description-btn" class="edit-btn"><i class="fas fa-edit"></i> Editar Proyecto</button>
+                    <button id="delete-project-btn" class="delete-btn"><i class="fas fa-trash-alt"></i> Eliminar Proyecto</button>
+                </div>
+            </div>
+            <ul id="project-tasks-list"></ul>
+            <form id="project-task-form">
+                <input type="text" id="project-task-name" placeholder="Nueva tarea para el proyecto" required>
+                <button type="submit"><i class="fas fa-plus"></i> Añadir Tarea</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="Agenda.js"></script>
+</body>
+</html>
