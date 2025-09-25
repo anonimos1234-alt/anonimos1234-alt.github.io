@@ -12,11 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const notImportantList = document.getElementById('not-important-tasks');
     const completedList = document.getElementById('completed-tasks');
     const todayTasksList = document.getElementById('today-tasks-list');
+    const overdueTasksList = document.getElementById('overdue-tasks-list');
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressPercentage = document.getElementById('progress-percentage');
     const clearCompletedBtn = document.getElementById('clear-completed-btn');
     const exportTasksBtn = document.getElementById('export-tasks-btn');
-    
+    const calendarContainer = document.getElementById('calendar-container');
+    const currentMonthYearHeader = document.getElementById('current-month-year');
+    const prevMonthBtn = document.getElementById('prev-month-btn');
+    const nextMonthBtn = document.getElementById('next-month-btn');
+
     // Selectores del DOM para el modo de proyectos
     const startProjectBtn = document.getElementById('start-project-btn');
     const projectModal = document.getElementById('project-modal');
@@ -42,11 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEditTaskId = null;
     let currentProjectId = null;
     let currentEditProjectTaskId = null;
+    let currentCalendarDate = new Date();
 
     // Inicializar la aplicación
-    renderTasks();
-    renderProjects();
-    renderTodayTasks();
+    renderAll();
 
     // Event Listeners para la gestión de tareas principales
     taskForm.addEventListener('submit', (e) => {
@@ -78,20 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         taskForm.reset();
         saveTasks();
-        renderTasks();
-        renderTodayTasks();
+        renderAll();
     });
 
     clearCompletedBtn.addEventListener('click', () => {
         if (confirm('¿Estás seguro de que quieres eliminar todas las tareas completadas?')) {
             tasks = tasks.filter(task => !task.completed);
             saveTasks();
-            renderTasks();
-            renderTodayTasks();
+            renderAll();
         }
     });
 
     exportTasksBtn.addEventListener('click', exportTasksToCSV);
+
+    prevMonthBtn.addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    function renderAll() {
+        renderTasks();
+        renderTodayTasks();
+        renderOverdueTasks();
+        renderCalendar();
+        updateProgress();
+    }
 
     function renderTasks() {
         importantList.innerHTML = '';
@@ -101,15 +121,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pendingTasks = tasks.filter(task => !task.completed).sort((a, b) => new Date(a.date) - new Date(b.date));
         const completedTasks = tasks.filter(task => task.completed);
+        const today = new Date().toISOString().slice(0, 10);
 
         pendingTasks.forEach(task => {
-            const taskItem = createTaskElement(task);
-            if (task.priority === 'important') {
-                importantList.appendChild(taskItem);
-            } else if (task.priority === 'intermediate') {
-                intermediateList.appendChild(taskItem);
-            } else {
-                notImportantList.appendChild(taskItem);
+            if (task.date > today) {
+                const taskItem = createTaskElement(task);
+                if (task.priority === 'important') {
+                    importantList.appendChild(taskItem);
+                } else if (task.priority === 'intermediate') {
+                    intermediateList.appendChild(taskItem);
+                } else {
+                    notImportantList.appendChild(taskItem);
+                }
             }
         });
 
@@ -117,8 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const taskItem = createTaskElement(task, true);
             completedList.appendChild(taskItem);
         });
-
-        updateProgress();
     }
 
     function renderTodayTasks() {
@@ -135,6 +156,65 @@ document.addEventListener('DOMContentLoaded', () => {
             const taskItem = createTaskElement(task);
             todayTasksList.appendChild(taskItem);
         });
+    }
+    
+    function renderOverdueTasks() {
+        overdueTasksList.innerHTML = '';
+        const today = new Date().toISOString().slice(0, 10);
+        const overdueTasks = tasks.filter(task => task.date < today && !task.completed);
+
+        if (overdueTasks.length === 0) {
+            overdueTasksList.innerHTML = '<p class="empty-state">✅ ¡Todo al día! ✅</p>';
+            return;
+        }
+
+        overdueTasks.forEach(task => {
+            const taskItem = createTaskElement(task);
+            overdueTasksList.appendChild(taskItem);
+        });
+    }
+
+    function renderCalendar() {
+        calendarContainer.innerHTML = '';
+        const today = new Date();
+        const currentMonth = currentCalendarDate.getMonth();
+        const currentYear = currentCalendarDate.getFullYear();
+        
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 = Domingo, 1 = Lunes...
+
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        currentMonthYearHeader.innerHTML = `<i class="fas fa-calendar-alt"></i> ${monthNames[currentMonth]} ${currentYear}`;
+
+        const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        daysOfWeek.forEach(day => {
+            const header = document.createElement('div');
+            header.classList.add('calendar-day-header');
+            header.textContent = day;
+            calendarContainer.appendChild(header);
+        });
+
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            const emptyDay = document.createElement('div');
+            calendarContainer.appendChild(emptyDay);
+        }
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayElement = document.createElement('div');
+            dayElement.classList.add('calendar-day');
+            dayElement.textContent = i;
+            
+            const dateString = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+            if (tasks.some(task => task.date === dateString && !task.completed)) {
+                dayElement.classList.add('has-task');
+            }
+
+            if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                dayElement.classList.add('today');
+            }
+
+            calendarContainer.appendChild(dayElement);
+        }
     }
 
     function createTaskElement(task, isCompleted = false) {
@@ -178,23 +258,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function markTaskAsCompleted(id) {
         tasks = tasks.map(task => task.id === id ? { ...task, completed: true } : task);
         saveTasks();
-        renderTasks();
-        renderTodayTasks();
+        renderAll();
     }
 
     function unmarkTaskAsCompleted(id) {
         tasks = tasks.map(task => task.id === id ? { ...task, completed: false } : task);
         saveTasks();
-        renderTasks();
-        renderTodayTasks();
+        renderAll();
     }
 
     function deleteTask(id) {
         if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
             tasks = tasks.filter(task => task.id !== id);
             saveTasks();
-            renderTasks();
-            renderTodayTasks();
+            renderAll();
         }
     }
 
