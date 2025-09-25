@@ -96,14 +96,19 @@
                 <div class="completed-tasks-container card">
                     <div class="completed-header">
                         <h2><i class="fas fa-check-circle"></i> Tareas Completadas</h2>
-                        <button id="export-tasks-btn" class="export-btn"><i class="fas fa-file-csv"></i> Exportar CSV</button>
-                        <button id="clear-completed-btn" class="clear-btn"><i class="fas fa-trash-alt"></i> Limpiar</button>
+                        <div class="actions">
+                            <button id="import-tasks-btn" class="import-btn"><i class="fas fa-file-import"></i> Importar CSV</button>
+                            <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                            <button id="export-tasks-btn" class="export-btn"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+                            <button id="clear-completed-btn" class="clear-btn"><i class="fas fa-trash-alt"></i> Limpiar</button>
+                        </div>
                     </div>
                     <ul id="completed-tasks" class="task-list completed-list"></ul>
                 </div>
             </div>
             
         </div>
+        
         <div class="bottom-sections">
             <div class="stats-section card">
                 <h2><i class="fas fa-chart-line"></i> Mi Progreso</h2>
@@ -123,7 +128,7 @@
                 </div>
             </div>
         </div>
-        </div>
+    </div>
     
     <div id="project-modal" class="modal-overlay">
         <div class="modal-content">
