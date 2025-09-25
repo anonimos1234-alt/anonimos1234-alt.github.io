@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevMonthBtn = document.getElementById('prev-month-btn');
     const nextMonthBtn = document.getElementById('next-month-btn');
 
+    // NUEVOS SELECTORES
+    const importTasksBtn = document.getElementById('import-tasks-btn');
+    const csvFileInput = document.getElementById('csv-file-input');
+
     // Selectores del DOM para el modo de proyectos
     const startProjectBtn = document.getElementById('start-project-btn');
     const projectModal = document.getElementById('project-modal');
@@ -94,6 +98,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     exportTasksBtn.addEventListener('click', exportTasksToCSV);
+
+    // NUEVOS EVENT LISTENERS
+    importTasksBtn.addEventListener('click', () => {
+        csvFileInput.click();
+    });
+
+    csvFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const csvData = e.target.result;
+                importTasksFromCSV(csvData);
+            };
+            reader.readAsText(file);
+        }
+    });
 
     prevMonthBtn.addEventListener('click', () => {
         currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
@@ -304,8 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = ["ID", "Nombre", "Detalles", "Fecha", "Prioridad", "Completada"];
         const rows = tasks.map(task => [
             task.id,
-            `"${task.name}"`,
-            `"${task.details}"`,
+            `"${task.name.replace(/"/g, '""')}"`,
+            `"${task.details.replace(/"/g, '""')}"`,
             task.date,
             task.priority,
             task.completed
@@ -326,6 +347,36 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+    
+    // NUEVA FUNCIÓN: Importar tareas desde un archivo CSV
+    function importTasksFromCSV(csvData) {
+        try {
+            const rows = csvData.trim().split('\n').slice(1);
+            const newTasks = rows.map(row => {
+                const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                return {
+                    id: parseInt(values[0]),
+                    name: values[1].replace(/"/g, '').trim(),
+                    details: values[2].replace(/"/g, '').trim(),
+                    date: values[3].trim(),
+                    priority: values[4].trim(),
+                    completed: values[5].trim() === 'true'
+                };
+            });
+
+            if (newTasks.length > 0) {
+                tasks = [...tasks, ...newTasks];
+                saveTasks();
+                renderAll();
+                alert('¡Tareas importadas con éxito!');
+            } else {
+                alert('El archivo CSV está vacío o no tiene el formato correcto.');
+            }
+        } catch (error) {
+            console.error('Error al importar el archivo CSV:', error);
+            alert('Hubo un error al leer el archivo. Asegúrate de que tenga el formato CSV correcto.');
+        }
     }
 
     // --- Lógica del modo de proyecto mágico ---
