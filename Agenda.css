@@ -668,3 +668,22 @@ button:active,
         grid-template-columns: 1fr;
     }
 }   
+
+/* ...código anterior... */
+
+/* Botón limpiar, exportar e importar */
+.completed-header .clear-btn,
+.completed-header .export-btn,
+.completed-header .import-btn {
+    font-size: 0.9rem;
+    padding: 10px 18px;
+    color: white;
+}
+
+.clear-btn { background: var(--delete-color); }
+
+.export-btn { background: linear-gradient(45deg, #3498db, #2980b9); }
+
+.import-btn { background: linear-gradient(45deg, #8e44ad, #9b59b6); }
+
+/* ...resto del código... */
