@@ -55,9 +55,25 @@
             
             <div class="tasks-and-stats-container">
                 
-                <div class="today-tasks-widget card">
-                    <h2><i class="fas fa-sun"></i> Tareas de Hoy</h2>
-                    <ul id="today-tasks-list" class="task-list"></ul>
+                <div class="top-widgets">
+                    <div class="today-tasks-widget card">
+                        <h2><i class="fas fa-sun"></i> Tareas de Hoy</h2>
+                        <ul id="today-tasks-list" class="task-list"></ul>
+                    </div>
+
+                    <div class="calendar-widget card">
+                        <div class="calendar-header">
+                            <button id="prev-month-btn" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+                            <h2 id="current-month-year"><i class="fas fa-calendar-alt"></i> Calendario</h2>
+                            <button id="next-month-btn" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div id="calendar-container"></div>
+                    </div>
+                </div>
+
+                <div class="overdue-tasks-widget card">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Tareas Atrasadas</h2>
+                    <ul id="overdue-tasks-list" class="task-list"></ul>
                 </div>
 
                 <div class="task-sections">
@@ -103,11 +119,11 @@
                 <h2><i class="fas fa-project-diagram"></i> Modo de Proyecto Mágico</h2>
                 <p>Desglosa un gran proyecto en tareas más pequeñas y manejables.</p>
                 <div class="project-controls">
-                    
+                    <button id="start-project-btn" class="btn-base"><i class="fas fa-plus"></i> Gestionar Proyectos</button>
                 </div>
             </div>
         </div>
-    </div>
+        </div>
     
     <div id="project-modal" class="modal-overlay">
         <div class="modal-content">
@@ -119,7 +135,7 @@
             <form id="project-form">
                 <input type="text" id="project-name" placeholder="Nombre del proyecto" required>
                 <textarea id="project-details" placeholder="Descripción del proyecto..."></textarea>
-                /* <button type="submit" id="add-project-btn"><i class="fas fa-plus"></i> Añadir Proyecto</button> */
+                <button type="submit" id="add-project-btn"><i class="fas fa-plus"></i> Añadir Proyecto</button>
             </form>
         </div>
     </div>
