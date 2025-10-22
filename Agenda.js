@@ -50,8 +50,182 @@ document.addEventListener('DOMContentLoaded', () => {
     let projects = JSON.parse(localStorage.getItem('projects')) || [];
     let currentEditTaskId = null;
     let currentProjectId = null;
+    let currentEditProjectId = null;
     let currentEditProjectTaskId = null;
     let currentCalendarDate = new Date();
+    // Tema oscuro
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+
+    // Custom select elements
+    const nativePrioritySelect = document.getElementById('task-priority');
+    let customSelectContainer = null;
+
+    // Capturar errores no manejados para facilitar debug e impedir que rompan la ejecución
+    window.addEventListener('error', (ev) => {
+        console.error('Unhandled error captured:', ev.message, ev.error);
+    });
+    window.addEventListener('unhandledrejection', (ev) => {
+        console.error('Unhandled promise rejection:', ev.reason);
+    });
+
+    function buildCustomSelect() {
+        // Si ya existe, no crear otra
+        if (customSelectContainer) return;
+
+        customSelectContainer = document.createElement('div');
+        customSelectContainer.className = 'custom-select-container';
+
+        const custom = document.createElement('div');
+        custom.className = 'custom-select';
+        custom.tabIndex = 0;
+
+        const label = document.createElement('span');
+        label.className = 'label';
+        label.textContent = nativePrioritySelect.options[nativePrioritySelect.selectedIndex].text;
+
+        const arrow = document.createElement('span');
+        arrow.className = 'arrow';
+        arrow.innerHTML = '<i class="fas fa-chevron-down"></i>';
+
+        custom.appendChild(label);
+        custom.appendChild(arrow);
+
+        const optionsList = document.createElement('div');
+        optionsList.className = 'custom-options';
+        optionsList.style.display = 'none';
+
+        Array.from(nativePrioritySelect.options).forEach((opt, idx) => {
+            const o = document.createElement('div');
+            o.className = 'custom-option';
+            o.tabIndex = -1;
+            o.dataset.value = opt.value;
+            o.innerHTML = opt.text;
+            if (nativePrioritySelect.selectedIndex === idx) o.setAttribute('aria-selected', 'true');
+            optionsList.appendChild(o);
+
+            o.addEventListener('click', () => {
+                selectCustomOption(idx);
+                closeOptions();
+            });
+        });
+
+        customSelectContainer.appendChild(custom);
+        customSelectContainer.appendChild(optionsList);
+
+        // Insertar después del contenedor .priority-options
+        const priorityWrapper = nativePrioritySelect.closest('.priority-options');
+        if (priorityWrapper) priorityWrapper.appendChild(customSelectContainer);
+
+        function openOptions() { optionsList.style.display = 'block'; custom.setAttribute('aria-expanded', 'true'); }
+        function closeOptions() { optionsList.style.display = 'none'; custom.setAttribute('aria-expanded', 'false'); }
+
+        custom.addEventListener('click', () => {
+            if (optionsList.style.display === 'block') closeOptions(); else openOptions();
+        });
+
+        // keyboard navigation
+        custom.addEventListener('keydown', (e) => {
+            const visible = optionsList.style.display === 'block';
+            const options = Array.from(optionsList.querySelectorAll('.custom-option'));
+            const currentIndex = options.findIndex(o => o.getAttribute('aria-selected') === 'true');
+
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (!visible) openOptions(); else { if (currentIndex >= 0) selectCustomOption(currentIndex); closeOptions(); }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!visible) { openOptions(); return; }
+                const next = Math.min(options.length -1, Math.max(0, currentIndex + 1));
+                if (currentIndex >= 0) options[currentIndex].removeAttribute('aria-selected');
+                options[next].setAttribute('aria-selected', 'true');
+                options[next].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!visible) { openOptions(); return; }
+                const prev = Math.max(0, (currentIndex === -1 ? 0 : currentIndex - 1));
+                if (currentIndex >= 0) options[currentIndex].removeAttribute('aria-selected');
+                options[prev].setAttribute('aria-selected', 'true');
+                options[prev].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Escape') { closeOptions(); }
+        });
+
+        function selectCustomOption(idx) {
+            const options = Array.from(optionsList.querySelectorAll('.custom-option'));
+            options.forEach((o, i) => { if (i === idx) o.setAttribute('aria-selected', 'true'); else o.removeAttribute('aria-selected'); });
+            const chosen = options[idx];
+            if (chosen) label.textContent = chosen.textContent;
+            // sincronizar con select nativo
+            nativePrioritySelect.selectedIndex = idx;
+            // dispatch event para que cualquier listener detecte el cambio
+            nativePrioritySelect.dispatchEvent(new Event('change'));
+        }
+
+        // click fuera para cerrar
+        document.addEventListener('click', (e) => {
+            if (!customSelectContainer) return;
+            if (!customSelectContainer.contains(e.target)) {
+                optionsList.style.display = 'none';
+            }
+        });
+    }
+
+    function destroyCustomSelect() {
+        if (!customSelectContainer) return;
+        customSelectContainer.remove();
+        customSelectContainer = null;
+    }
+
+    // construir custom select (siempre visible, ocultamos select nativo via CSS)
+    function syncCustomSelectWithTheme() {
+        buildCustomSelect();
+    }
+
+
+    function isDarkMode() {
+        return document.body.classList.contains('dark');
+    }
+
+    function applyTheme(dark) {
+        if (dark) {
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            themeToggleBtn.setAttribute('aria-pressed', 'true');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.body.classList.remove('dark');
+            themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+            themeToggleBtn.setAttribute('aria-pressed', 'false');
+        }
+    }
+
+    // Inicializar tema desde localStorage o preferencia del sistema
+    (function initTheme() {
+        const saved = localStorage.getItem('mi_agenda_tema');
+        if (saved !== null) {
+            applyTheme(saved === 'dark');
+        } else {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark);
+        }
+        // construir custom select (siempre)
+        syncCustomSelectWithTheme();
+    })();
+
+    themeToggleBtn.addEventListener('click', () => {
+        const newThemeDark = !isDarkMode();
+        applyTheme(newThemeDark);
+        localStorage.setItem('mi_agenda_tema', newThemeDark ? 'dark' : 'light');
+    });
+
+    // Si el select nativo cambia (por ejemplo programáticamente), actualizar label del custom select
+    nativePrioritySelect.addEventListener('change', () => {
+        if (!customSelectContainer) return;
+        const label = customSelectContainer.querySelector('.custom-select .label');
+        label.textContent = nativePrioritySelect.options[nativePrioritySelect.selectedIndex].text;
+        const options = Array.from(customSelectContainer.querySelectorAll('.custom-option'));
+        options.forEach((o, i) => { if (i === nativePrioritySelect.selectedIndex) o.setAttribute('aria-selected', 'true'); else o.removeAttribute('aria-selected'); });
+    });
 
     // Inicializar la aplicación
     renderAll();
@@ -381,20 +555,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lógica del modo de proyecto mágico ---
 
-    startProjectBtn.addEventListener('click', () => {
-        projectModal.style.display = 'flex';
-        renderProjects();
-    });
+    if (startProjectBtn) {
+        startProjectBtn.addEventListener('click', () => {
+            if (projectModal) {
+                projectModal.style.display = 'flex';
+            }
+            renderProjects();
+        });
+    }
 
-    closeProjectModalBtn.addEventListener('click', () => {
-        projectModal.style.display = 'none';
-        resetProjectForm();
-    });
+    if (closeProjectModalBtn) {
+        closeProjectModalBtn.addEventListener('click', () => {
+            if (projectModal) projectModal.style.display = 'none';
+            resetProjectForm();
+        });
+    }
 
-    closeProjectTasksBtn.addEventListener('click', () => {
-        projectTasksModal.style.display = 'none';
-        resetProjectTaskForm();
-    });
+    if (closeProjectTasksBtn) {
+        closeProjectTasksBtn.addEventListener('click', () => {
+            if (projectTasksModal) projectTasksModal.style.display = 'none';
+            resetProjectTaskForm();
+        });
+    }
     
     window.addEventListener('click', (e) => {
         if (e.target === projectModal) {
@@ -447,49 +629,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function renderProjects() {
+        if (!projectListContainer) return;
         projectListContainer.innerHTML = '';
         if (projects.length === 0) {
             projectListContainer.innerHTML = '<p class="empty-state">Aún no hay proyectos. ¡Crea el primero!</p>';
+            return;
         }
 
-        projects.forEach(project => {
-            const totalTasks = project.tasks.length;
-            const completedTasks = project.tasks.filter(t => t.completed).length;
-            const percentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+        try {
+            projects.forEach(project => {
+                const totalTasks = project.tasks.length;
+                const completedTasks = project.tasks.filter(t => t.completed).length;
+                const percentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-            const projectCard = document.createElement('div');
-            projectCard.classList.add('project-card');
-            projectCard.dataset.id = project.id;
-            projectCard.innerHTML = `
-                <h4><i class="fas fa-folder"></i> ${project.name}</h4>
-                <p>${project.details}</p>
-                <div class="project-progress-bar">
-                    <div class="project-progress-bar-fill" style="width: ${percentage}%"></div>
-                </div>
-                <div class="project-actions">
-                    <button class="view-project-btn btn-base" data-id="${project.id}"><i class="fas fa-eye"></i> Ver</button>
-                    <button class="edit-project-btn btn-base" data-id="${project.id}"><i class="fas fa-edit"></i> Editar</button>
-                    <button class="delete-project-btn btn-base" data-id="${project.id}"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                </div>
-            `;
-            projectListContainer.appendChild(projectCard);
+                const projectCard = document.createElement('div');
+                projectCard.classList.add('project-card');
+                projectCard.dataset.id = project.id;
+                projectCard.innerHTML = `
+                    <h4><i class="fas fa-folder"></i> ${project.name}</h4>
+                    <p>${project.details}</p>
+                    <div class="project-progress-bar">
+                        <div class="project-progress-bar-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="view-project-btn btn-base" data-id="${project.id}"><i class="fas fa-eye"></i> Ver</button>
+                        <button class="edit-project-btn btn-base" data-id="${project.id}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="delete-project-btn btn-base" data-id="${project.id}"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                    </div>
+                `;
 
-            projectCard.querySelector('.view-project-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                currentProjectId = project.id;
-                showProjectTasks(project);
-            });
-            projectCard.querySelector('.edit-project-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                editProject(project.id);
-            });
-            projectCard.querySelector('.delete-project-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (confirm('¿Estás seguro de que quieres eliminar este proyecto y todas sus tareas?')) {
-                    deleteProject(project.id);
+                projectListContainer.appendChild(projectCard);
+
+                const viewBtn = projectCard.querySelector('.view-project-btn');
+                const editBtn = projectCard.querySelector('.edit-project-btn');
+                const deleteBtn = projectCard.querySelector('.delete-project-btn');
+
+                if (viewBtn) {
+                    viewBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        currentProjectId = project.id;
+                        showProjectTasks(project);
+                    });
+                }
+                if (editBtn) {
+                    editBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editProject(project.id);
+                    });
+                }
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('¿Estás seguro de que quieres eliminar este proyecto y todas sus tareas?')) {
+                            deleteProject(project.id);
+                        }
+                    });
                 }
             });
-        });
+        } catch (err) {
+            console.error('Error rendering projects:', err);
+            projectListContainer.innerHTML += '<p class="error">Ocurrió un error al cargar los proyectos.</p>';
+        }
     }
 
     function editProject(id) {
